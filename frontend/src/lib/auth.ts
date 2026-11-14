@@ -1,5 +1,5 @@
 /**
- * Merchant Authentication and Session Management for Waga Inventory
+ * Merchant Authentication and Session Management for Waga Stock
  */
 
 export interface MerchantSession {

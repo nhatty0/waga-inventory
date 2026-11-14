@@ -211,6 +211,9 @@ export default function InventoryPage() {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Quick Filter State for Summary Cards ("ALL" | "IN_STOCK" | "IN_TRANSIT")
+  const [quickFilter, setQuickFilter] = useState<"ALL" | "IN_STOCK" | "IN_TRANSIT">("ALL");
+
   // Stepper pending state
   const [adjustingId, setAdjustingId] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -432,7 +435,7 @@ export default function InventoryPage() {
       await receiveTransit({
         variant_id: variantId,
         quantity: quantityReceived,
-        notes: notes || "Merkato truck arrival in Gondar",
+        notes: notes || "Merkato truck arrival",
       });
       // Silent sync to ensure database consistency
       fetchInventory(true);
@@ -543,12 +546,57 @@ export default function InventoryPage() {
           if (!matchesAllTokens) return;
         }
 
+        // 3. Filter by Dashboard Summary Card (In Stock vs In Transit)
+        if (quickFilter === "IN_STOCK" && v.stock_quantity <= 0) {
+          return;
+        }
+        if (quickFilter === "IN_TRANSIT" && v.in_transit_quantity <= 0) {
+          return;
+        }
+
         list.push({ product: prod, variant: v });
       });
     });
 
     return list;
-  }, [products, selectedCategory, searchQuery]);
+  }, [products, selectedCategory, searchQuery, quickFilter]);
+
+  // Dynamically extract unique brands strictly from the shop's existing database products (at most top 3)
+  const topDbBrands = useMemo(() => {
+    const brandCounts: Record<string, number> = {};
+    products.forEach((p) => {
+      p.variants.forEach((v) => {
+        const b = v.brand?.trim();
+        if (b) {
+          brandCounts[b] = (brandCounts[b] || 0) + 1;
+        }
+      });
+    });
+
+    return Object.keys(brandCounts)
+      .sort((a, b) => brandCounts[b] - brandCounts[a])
+      .slice(0, 3);
+  }, [products]);
+
+  const handleToggleStockFilter = () => {
+    const next = quickFilter === "IN_STOCK" ? "ALL" : "IN_STOCK";
+    setQuickFilter(next);
+    if (next === "IN_STOCK") {
+      setTimeout(() => {
+        document.getElementById("inventory-items-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    }
+  };
+
+  const handleToggleTransitFilter = () => {
+    const next = quickFilter === "IN_TRANSIT" ? "ALL" : "IN_TRANSIT";
+    setQuickFilter(next);
+    if (next === "IN_TRANSIT") {
+      setTimeout(() => {
+        document.getElementById("inventory-items-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    }
+  };
 
   // Aggregate stats
   const totalStockUnits = useMemo(() => {
@@ -599,7 +647,8 @@ export default function InventoryPage() {
     { label: "ሌላ (Other)", value: "Other" },
   ];
 
-  const isFiltering = searchQuery.trim().length > 0 || selectedCategory !== "ALL";
+  const isFiltering =
+    searchQuery.trim().length > 0 || selectedCategory !== "ALL" || quickFilter !== "ALL";
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -616,13 +665,26 @@ export default function InventoryPage() {
       <div className="max-w-md mx-auto px-4 py-3.5 space-y-3.5">
         {/* KPI Overview Bar: Shelf Stock vs Merkato Transit vs Today's Sales */}
         <div className="grid grid-cols-3 gap-2">
-          {/* Card 1: Shelf Stock */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-sm">
+          {/* Card 1: Shelf Stock (Interactive Clickable Card to filter in-stock items) */}
+          <button
+            type="button"
+            onClick={handleToggleStockFilter}
+            className={`bg-slate-900 border rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between text-left shadow-sm transition-all group active:scale-95 ${
+              quickFilter === "IN_STOCK"
+                ? "border-blue-500 ring-2 ring-blue-500/40 bg-blue-950/20"
+                : "border-slate-800 hover:border-blue-500/50 hover:bg-slate-800/80"
+            }`}
+            title="በመደብር ያለ ብቻ አሳይ (Filter In-Stock Only)"
+          >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 block tracking-tight truncate">
+              <span
+                className={`text-[10px] sm:text-[11px] font-bold block tracking-tight truncate transition-colors ${
+                  quickFilter === "IN_STOCK" ? "text-blue-300" : "text-slate-400 group-hover:text-blue-300"
+                }`}
+              >
                 {t.inventory.shelfStock}
               </span>
-              <div className="p-1.5 sm:p-2 rounded-xl bg-blue-950/60 border border-blue-800/50 text-blue-400">
+              <div className="p-1.5 sm:p-2 rounded-xl bg-blue-950/60 border border-blue-800/50 text-blue-400 group-hover:bg-blue-900/60 transition-all">
                 <Boxes className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
             </div>
@@ -630,17 +692,37 @@ export default function InventoryPage() {
               <span className="text-xl sm:text-2xl font-black text-blue-400 font-mono block">
                 {loading ? "..." : totalStockUnits}
               </span>
-              <span className="text-[10px] text-slate-400 font-medium">ፍሬ במደብር</span>
+              <div className="flex items-center justify-between mt-0.5 text-[10px]">
+                <span className={quickFilter === "IN_STOCK" ? "text-blue-400 font-bold" : "text-slate-500 font-medium"}>
+                  {quickFilter === "IN_STOCK" ? "✓ ተመርጧል" : "ያጣሩ"}
+                </span>
+                <span className="text-blue-400 font-bold group-hover:translate-x-0.5 transition-transform">
+                  {quickFilter === "IN_STOCK" ? "አጽዳ ✕" : "ክፈት →"}
+                </span>
+              </div>
             </div>
-          </div>
+          </button>
 
-          {/* Card 2: Merkato Transit */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-sm">
+          {/* Card 2: Merkato Transit (Interactive Clickable Card to filter in-transit items) */}
+          <button
+            type="button"
+            onClick={handleToggleTransitFilter}
+            className={`bg-slate-900 border rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between text-left shadow-sm transition-all group active:scale-95 ${
+              quickFilter === "IN_TRANSIT"
+                ? "border-amber-500 ring-2 ring-amber-500/40 bg-amber-950/20"
+                : "border-slate-800 hover:border-amber-500/50 hover:bg-slate-800/80"
+            }`}
+            title="በመንገድ ላይ ብቻ አሳይ (Filter In-Transit Only)"
+          >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 block tracking-tight truncate">
+              <span
+                className={`text-[10px] sm:text-[11px] font-bold block tracking-tight truncate transition-colors ${
+                  quickFilter === "IN_TRANSIT" ? "text-amber-300" : "text-slate-400 group-hover:text-amber-300"
+                }`}
+              >
                 {t.inventory.merkatoTransit}
               </span>
-              <div className="p-1.5 sm:p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+              <div className="p-1.5 sm:p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 group-hover:bg-amber-500/20 transition-all">
                 <Truck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
             </div>
@@ -648,9 +730,16 @@ export default function InventoryPage() {
               <span className="text-xl sm:text-2xl font-black text-amber-400 font-mono block">
                 {loading ? "..." : totalTransitUnits}
               </span>
-              <span className="text-[10px] text-slate-400 font-medium">ፍሬ በመንገድ</span>
+              <div className="flex items-center justify-between mt-0.5 text-[10px]">
+                <span className={quickFilter === "IN_TRANSIT" ? "text-amber-400 font-bold" : "text-slate-500 font-medium"}>
+                  {quickFilter === "IN_TRANSIT" ? "✓ ተመርጧል" : "ያጣሩ"}
+                </span>
+                <span className="text-amber-400 font-bold group-hover:translate-x-0.5 transition-transform">
+                  {quickFilter === "IN_TRANSIT" ? "አጽዳ ✕" : "ክፈት →"}
+                </span>
+              </div>
             </div>
-          </div>
+          </button>
 
           {/* Card 3: Today's Sales (Interactive Clickable Card to open Cash Drawer) */}
           <button
@@ -736,6 +825,32 @@ export default function InventoryPage() {
           })}
         </div>
 
+        {/* Active Quick Filter Indicator */}
+        {quickFilter !== "ALL" && (
+          <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-800 text-xs shadow-sm">
+            <span className="text-slate-300 font-bold flex items-center gap-1.5">
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  quickFilter === "IN_STOCK" ? "bg-blue-400" : "bg-amber-400"
+                }`}
+              />
+              <span>
+                {quickFilter === "IN_STOCK"
+                  ? "በመደብር ያለ ብቻ (In Stock Items)"
+                  : "በመንገድ ላይ ያለ ብቻ (In Transit Items)"}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuickFilter("ALL")}
+              className="text-slate-400 hover:text-white font-bold text-[11px] flex items-center gap-1 bg-slate-800 px-2 py-0.5 rounded-lg active:scale-95 transition-all"
+            >
+              <span>አጽዳ</span>
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        )}
+
         {/* Error State */}
         {error && (
           <div className="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-4 text-center space-y-2">
@@ -788,6 +903,7 @@ export default function InventoryPage() {
                 onClick={() => {
                   setSearchQuery("");
                   setSelectedCategory("ALL");
+                  setQuickFilter("ALL");
                 }}
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-black text-xs shadow-lg shadow-blue-600/30 border border-blue-400/30 active:scale-95 transition-all"
               >
@@ -808,7 +924,7 @@ export default function InventoryPage() {
 
         {/* Product Cards List */}
         {!loading && !error && (
-          <div className="space-y-3">
+          <div id="inventory-items-section" className="space-y-3">
             {filteredItems.map(({ product, variant }) => {
               const isAdjusting = adjustingId === variant.id;
               const hasTransit = variant.in_transit_quantity > 0;
@@ -985,6 +1101,7 @@ export default function InventoryPage() {
       <AddProductModal
         isOpen={isAddModalOpen}
         initialBarcode={addModalInitialBarcode}
+        suggestedBrands={topDbBrands}
         onClose={() => {
           setIsAddModalOpen(false);
           setAddModalInitialBarcode("");
@@ -1001,6 +1118,7 @@ export default function InventoryPage() {
           isOpen={!!editingItem}
           product={editingItem.product}
           variant={editingItem.variant}
+          suggestedBrands={topDbBrands}
           onClose={() => setEditingItem(null)}
           onSave={handleSaveEdit}
           isSaving={savingEdit}

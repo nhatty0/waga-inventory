@@ -2,9 +2,9 @@ export type Language = "am" | "en";
 
 export const translations = {
   am: {
-    appName: "ዋጋ ኢንቬንቶሪ",
+    appName: "ዋጋ ስቶክ",
     appShort: "ዋጋ",
-    shopLocation: "እስቲፍ ኤሌክትሮኒክስ",
+    shopLocation: "ዋጋ ስቶክ",
     langName: "አማርኛ",
     otherLang: "English",
 
@@ -129,7 +129,7 @@ export const translations = {
       tabPaymentDesc: "በቴሌብር ወይም በባንክ የተከፈለ",
       paymentAmount: "የተከፈለ ገንዘብ መጠን (ብር)",
       returnNoticeTitle: "የተበደሩ ዕቃዎችን ወደ መደብር መመለስ",
-      returnNoticeDesc: "ሁሉም የተወሰዱ ዕቃዎች በሙሉ ወደ ጎንደር መደብር ክምችት ይመለሳሉ።",
+      returnNoticeDesc: "ሁሉም የተወሰዱ ዕቃዎች በሙሉ ወደ መደብር ክምችት ይመለሳሉ።",
       memoLabel: "የማወራረጃ ማስታወሻ",
       memoPlaceholder: "ምሳሌ፦ ዕቃው ሳይከፈት ተመልሷል / ቴሌብር ደረሰኝ ቁጥር",
       btnProcessing: "በማወራረድ ላይ...",
@@ -169,7 +169,7 @@ export const translations = {
       productNameLabel: "የዕቃው አይነት / ስም",
       productNamePlaceholder: "ምሳሌ፦ Smart TV, Blender, Water Filter...",
       brandLabel: "ስም / ብራንድ",
-      brandPlaceholder: "ምሳሌ፦ Skyworth, Samsung, Geepas...",
+      brandPlaceholder: "የብራንድ ስም ያስገቡ (Brand name)...",
       specLabel: "ዝርዝር መግለጫ / ኢንች",
       specPlaceholder: 'ምሳሌ፦ 43" 4K UHD, 1.8L Stainless...',
       initialStockLabel: "በመደብር ያለ ብዛት",
@@ -200,9 +200,9 @@ export const translations = {
   },
 
   en: {
-    appName: "Waga Inventory",
+    appName: "Waga Stock",
     appShort: "Waga",
-    shopLocation: "Estif Electronics",
+    shopLocation: "Waga Stock",
     langName: "English",
     otherLang: "አማርኛ",
 
@@ -327,7 +327,7 @@ export const translations = {
       tabPaymentDesc: "Telebirr / CBE Birr receipt",
       paymentAmount: "Payment Amount (ETB)",
       returnNoticeTitle: "Returning borrowed items to stock",
-      returnNoticeDesc: "All lent items will be automatically re-credited to Gondar shelf inventory.",
+      returnNoticeDesc: "All lent items will be automatically re-credited to shelf inventory.",
       memoLabel: "Settlement Note",
       memoPlaceholder: "e.g. Returned in original box / Paid CBE #109283",
       btnProcessing: "Processing...",
@@ -367,7 +367,7 @@ export const translations = {
       productNameLabel: "Product Name / Type",
       productNamePlaceholder: "e.g. Smart TV, Boiler, Blender...",
       brandLabel: "Brand / Maker",
-      brandPlaceholder: "e.g. Skyworth, Samsung, Geepas...",
+      brandPlaceholder: "Enter brand name...",
       specLabel: "Specification / Size",
       specPlaceholder: 'e.g. 43" 4K UHD, 1.8L Stainless...',
       initialStockLabel: "In Stock (Count)",

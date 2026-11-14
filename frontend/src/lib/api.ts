@@ -1,5 +1,5 @@
 /**
- * Waga Inventory API Client
+ * Waga Stock API Client
  * Connects to FastAPI backend at process.env.NEXT_PUBLIC_API_URL or http://127.0.0.1:8000
  */
 
@@ -301,7 +301,7 @@ export async function createClient(payload: {
     method: "POST",
     body: JSON.stringify({
       ...payload,
-      location: payload.location || "Gondar",
+      location: payload.location || "",
     }),
   });
 }

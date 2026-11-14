@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ዋጋ ኢንቬንቶሪ - Waga Inventory | Estif Electronics",
-  description: "የኤሌክትሮኒክስ ሱቅ ክምችትና የጎረቤት ብድር ማስተዳደሪያ - እስቲፍ ኤሌክትሮኒክስ (Gondar, Piassa)",
+  title: "ዋጋ ስቶክ - Waga Stock",
+  description: "ንግድዎን በቀላሉ ያስተዳድሩ - Manage your business easily",
   manifest: "/manifest.json",
   applicationName: "Waga Stock",
   appleWebApp: {

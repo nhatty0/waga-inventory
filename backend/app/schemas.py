@@ -110,7 +110,7 @@ class ClientBase(BaseModel):
     name: str
     phone: Optional[str] = None
     type: ClientType = ClientType.REGULAR_CUSTOMER
-    location: str = "Gondar"
+    location: str = ""
 
 
 class ClientCreate(ClientBase):

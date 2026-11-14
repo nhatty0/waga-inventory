@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Boxes,
   Lock,
   Phone,
   Store,
@@ -16,6 +15,7 @@ import {
 import { loginShop, registerShop } from "@/lib/api";
 import { isAuthenticated } from "@/lib/auth";
 import { useShop } from "@/context/ShopContext";
+import WagaLogo from "@/components/WagaLogo";
 
 type AuthMode = "LOGIN" | "REGISTER";
 
@@ -33,7 +33,7 @@ export default function LoginPage() {
 
   // Form Fields - Register
   const [regShopName, setRegShopName] = useState<string>("");
-  const [regLocation, setRegLocation] = useState<string>("Gondar");
+  const [regLocation, setRegLocation] = useState<string>("");
   const [regPhone, setRegPhone] = useState<string>("");
   const [regPin, setRegPin] = useState<string>("");
 
@@ -84,7 +84,7 @@ export default function LoginPage() {
     setError(null);
 
     const cleanName = regShopName.trim();
-    const cleanLocation = regLocation.trim() || "Gondar";
+    const cleanLocation = regLocation.trim();
     const cleanPhone = regPhone.trim();
     const cleanPin = regPin.trim();
 
@@ -132,20 +132,16 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md relative z-10 space-y-6">
         {/* Brand Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex p-3 rounded-2xl bg-blue-600/15 border border-blue-500/30 text-blue-400 shadow-xl shadow-blue-600/20 mb-1">
-            <Boxes className="w-9 h-9 stroke-[2.2]" />
+        <div className="text-center space-y-2.5">
+          <div className="flex justify-center mb-1">
+            <WagaLogo size="lg" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            ዋጋ ኢንቬንቶሪ
+            ዋጋ ስቶክ
           </h1>
           <p className="text-xs text-slate-400 font-medium max-w-xs mx-auto">
-            የኤሌክትሮኒክስ ሱቅ ክምችት፣ የጎረቤት ውሰትና የጅምላ ሽያጭ ማስተዳደሪያ
+            ንግድዎን በቀላሉ ያስተዳድሩ • Manage your business easily
           </p>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] text-blue-400 font-mono">
-            <MapPin className="w-3 h-3 text-blue-400" />
-            <span>ጎንደር ፒያሳ • Gondar, Ethiopia</span>
-          </div>
         </div>
 
         {/* Auth Card */}
@@ -207,7 +203,7 @@ export default function LoginPage() {
                     type="tel"
                     inputMode="tel"
                     required
-                    placeholder="0918112233"
+                    placeholder="09..."
                     value={loginPhone}
                     onChange={(e) => setLoginPhone(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-sm text-white font-mono placeholder:text-slate-600 focus:outline-none focus:border-blue-500 transition-colors shadow-inner"
@@ -260,12 +256,6 @@ export default function LoginPage() {
                   </>
                 )}
               </button>
-
-              <div className="pt-1 text-center">
-                <p className="text-[11px] text-slate-500">
-                  የሙከራ ሱቅ፦ <span className="font-mono text-slate-300 font-bold">0918112233</span> • ፒን፦ <span className="font-mono text-slate-300 font-bold">1234</span>
-                </p>
-              </div>
             </form>
           ) : (
             /* Form 2: REGISTER SHOP FORM */
@@ -294,8 +284,7 @@ export default function LoginPage() {
                 </label>
                 <input
                   type="text"
-                  required
-                  placeholder="Gondar"
+                  placeholder="ምሳሌ፦ አዲስ አበባ / ቦሌ (e.g. Addis Ababa)"
                   value={regLocation}
                   onChange={(e) => setRegLocation(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500 transition-colors shadow-inner"
@@ -312,7 +301,7 @@ export default function LoginPage() {
                   type="tel"
                   inputMode="tel"
                   required
-                  placeholder="0918112233"
+                  placeholder="09..."
                   value={regPhone}
                   onChange={(e) => setRegPhone(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono placeholder:text-slate-600 focus:outline-none focus:border-blue-500 transition-colors shadow-inner"
@@ -370,11 +359,6 @@ export default function LoginPage() {
             </form>
           )}
         </div>
-
-        {/* Footer info */}
-        <p className="text-center text-[11px] text-slate-500">
-          Waga Multi-Tenant Shop Isolation • Fast & Secure Local DB
-        </p>
       </div>
     </div>
   );

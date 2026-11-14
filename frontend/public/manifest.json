@@ -1,7 +1,7 @@
 {
-  "name": "ዋጋ ኢንቬንቶሪ - Waga Inventory",
+  "name": "ዋጋ ስቶክ - Waga Stock",
   "short_name": "Waga Stock",
-  "description": "የኤሌክትሮኒክስ ሱቅ ክምችትና የጎረቤት ብድር ማስተዳደሪያ - ጎንደር",
+  "description": "ንግድዎን በቀላሉ ያስተዳድሩ - Manage your business easily",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

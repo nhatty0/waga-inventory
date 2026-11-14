@@ -11,6 +11,7 @@ interface AddProductModalProps {
   onClose: () => void;
   onSuccess: () => void;
   initialBarcode?: string;
+  suggestedBrands?: string[];
 }
 
 export type CategoryKey =
@@ -22,14 +23,15 @@ export type CategoryKey =
   | "Accessories"
   | "Other";
 
+// Hardcoded brand lists removed in favor of dynamic DB brand extraction
 export const CATEGORY_BRANDS: Record<CategoryKey, string[]> = {
-  Fridge: ["Hitachi", "Samsung", "LG", "Super General", "Beko", "Hisense"],
-  WaterFilter: ["Pureit", "Aqua", "Geepas", "Royal", "Kent"],
-  Stabilizer: ["Sollatek", "Blue Gate", "Stac", "Mercury", "Universal"],
-  TV: ["Skyworth", "Samsung", "Sony", "LG", "Hisense", "Star-X", "TCL"],
-  Kitchen: ["Geepas", "Philips", "Sokany", "DSP", "Black & Decker", "Crown"],
-  Accessories: ["SuperCrypt", "Star-X", "Universal", "Generic"],
-  Other: ["Generic"],
+  Fridge: [],
+  WaterFilter: [],
+  Stabilizer: [],
+  TV: [],
+  Kitchen: [],
+  Accessories: [],
+  Other: [],
 };
 
 export const CATEGORY_SPEC_PLACEHOLDERS: Record<CategoryKey, string> = {
@@ -55,7 +57,7 @@ export const CATEGORY_TEMPLATES: Record<
 > = {
   TV: {
     name: "Smart TV",
-    brand: "Skyworth",
+    brand: "",
     spec: '43" 4K Smart UHD',
     retailPrice: 34500,
     wholesalePrice: 31000,
@@ -63,7 +65,7 @@ export const CATEGORY_TEMPLATES: Record<
   },
   Fridge: {
     name: "Refrigerator / Freezer",
-    brand: "Hitachi",
+    brand: "",
     spec: "ድርብ በር 350 ሊትር (Double Door 350L)",
     retailPrice: 72000,
     wholesalePrice: 65000,
@@ -71,7 +73,7 @@ export const CATEGORY_TEMPLATES: Record<
   },
   WaterFilter: {
     name: "Water Filter & Purifier",
-    brand: "Pureit",
+    brand: "",
     spec: "20 ሊትር (20L Gravity Purifier)",
     retailPrice: 6200,
     wholesalePrice: 5400,
@@ -79,7 +81,7 @@ export const CATEGORY_TEMPLATES: Record<
   },
   Stabilizer: {
     name: "Voltage Regulator / Stabilizer",
-    brand: "Sollatek",
+    brand: "",
     spec: "2000W Automatic Voltage Regulator",
     retailPrice: 4800,
     wholesalePrice: 4100,
@@ -87,7 +89,7 @@ export const CATEGORY_TEMPLATES: Record<
   },
   Kitchen: {
     name: "Electric Boiler & Kettle",
-    brand: "Geepas",
+    brand: "",
     spec: "1.8L Stainless Steel",
     retailPrice: 2500,
     wholesalePrice: 2100,
@@ -95,7 +97,7 @@ export const CATEGORY_TEMPLATES: Record<
   },
   Accessories: {
     name: "Decoders & Mounts",
-    brand: "SuperCrypt",
+    brand: "",
     spec: '32-55" Wall Mount Hanger',
     retailPrice: 1400,
     wholesalePrice: 1000,
@@ -103,7 +105,7 @@ export const CATEGORY_TEMPLATES: Record<
   },
   Other: {
     name: "",
-    brand: "Generic",
+    brand: "",
     spec: "",
     retailPrice: 0,
     wholesalePrice: 0,
@@ -126,12 +128,13 @@ export default function AddProductModal({
   onClose,
   onSuccess,
   initialBarcode = "",
+  suggestedBrands = [],
 }: AddProductModalProps) {
   const { t } = useLanguage();
 
   const [category, setCategory] = useState<CategoryKey>("TV");
   const [productName, setProductName] = useState<string>("Smart TV");
-  const [brand, setBrand] = useState<string>("Skyworth");
+  const [brand, setBrand] = useState<string>("");
   const [spec, setSpec] = useState<string>('43" 4K Smart UHD');
   const [barcode, setBarcode] = useState<string>(initialBarcode);
   const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
@@ -152,9 +155,16 @@ export default function AddProductModal({
     }
   }, [initialBarcode]);
 
+  useEffect(() => {
+    if (isOpen) {
+      setBrand("");
+      setError(null);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  const currentBrandChips = CATEGORY_BRANDS[category] || ["Generic"];
+  const currentBrandChips = suggestedBrands.slice(0, 3);
   const currentSpecPlaceholder = CATEGORY_SPEC_PLACEHOLDERS[category] || "ዝርዝር መግለጫ / Model & Specs";
 
   const handleCategorySelect = (catKey: CategoryKey) => {
@@ -162,7 +172,7 @@ export default function AddProductModal({
     const tmpl = CATEGORY_TEMPLATES[catKey];
     if (tmpl) {
       setProductName(tmpl.name);
-      setBrand(tmpl.brand);
+      if (tmpl.brand) setBrand(tmpl.brand);
       setSpec(tmpl.spec);
       setRetailPrice(tmpl.retailPrice || "");
       setWholesalePrice(tmpl.wholesalePrice || "");
@@ -284,38 +294,42 @@ export default function AddProductModal({
               />
             </div>
 
-            {/* 3. Dynamic Brand Chips by Category */}
+            {/* 3. Dynamic Database Brand Chips (At most 3) */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-bold text-slate-300">
                   {t.addModal.brandLabel}
                 </label>
-                <span className="text-[10px] text-slate-400 flex items-center gap-0.5 font-medium">
-                  <Sparkles className="w-2.5 h-2.5 text-amber-400" />
-                  <span>ምርጫዎች (Brands)</span>
-                </span>
+                {currentBrandChips.length > 0 && (
+                  <span className="text-[10px] text-slate-400 flex items-center gap-0.5 font-medium">
+                    <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                    <span>የተለመዱ ብራንዶች ({currentBrandChips.length})</span>
+                  </span>
+                )}
               </div>
 
-              {/* Dynamic Category Brand Chips */}
-              <div className="flex gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin scrollbar-thumb-slate-700 mb-1.5 select-none">
-                {currentBrandChips.map((b) => {
-                  const isSelected = brand.toLowerCase() === b.toLowerCase();
-                  return (
-                    <button
-                      key={b}
-                      type="button"
-                      onClick={() => setBrand(b)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap border transition-all active:scale-95 ${
-                        isSelected
-                          ? "bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-950/40"
-                          : "bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-white"
-                      }`}
-                    >
-                      {b}
-                    </button>
-                  );
-                })}
-              </div>
+              {/* Dynamic Database Brand Chips */}
+              {currentBrandChips.length > 0 && (
+                <div className="flex gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin scrollbar-thumb-slate-700 mb-1.5 select-none">
+                  {currentBrandChips.map((b) => {
+                    const isSelected = brand.toLowerCase() === b.toLowerCase();
+                    return (
+                      <button
+                        key={b}
+                        type="button"
+                        onClick={() => setBrand(b)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap border transition-all active:scale-95 ${
+                          isSelected
+                            ? "bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-950/40"
+                            : "bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-white"
+                        }`}
+                      >
+                        {b}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
               <input
                 type="text"

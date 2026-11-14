@@ -22,14 +22,14 @@ export default function ReceiveTransitModal({
   isSubmitting = false,
 }: ReceiveTransitModalProps) {
   const [quantity, setQuantity] = useState<number | "">(1);
-  const [notes, setNotes] = useState<string>("Merkato truck arrival in Gondar");
+  const [notes, setNotes] = useState<string>("Merkato truck arrival");
   const [localError, setLocalError] = useState<string | null>(null);
 
   // Pre-fill quantity with total in-transit count whenever modal opens
   useEffect(() => {
     if (variant && isOpen) {
       setQuantity(Math.max(1, variant.in_transit_quantity));
-      setNotes("Merkato truck arrival in Gondar");
+      setNotes("Merkato truck arrival");
       setLocalError(null);
     }
   }, [variant, isOpen]);

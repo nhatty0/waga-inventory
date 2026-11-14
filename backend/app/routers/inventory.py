@@ -164,7 +164,7 @@ def receive_transit(
         previous_in_transit=prev_transit,
         new_in_transit=variant.in_transit_quantity,
         message=(
-            f"Successfully received {payload.quantity} units from Merkato into Gondar shelf stock.{notes_memo}"
+            f"Successfully received {payload.quantity} units from Merkato into shelf stock.{notes_memo}"
         )
     )
 
@@ -205,7 +205,7 @@ def add_to_transit(
         new_stock=variant.stock_quantity,
         previous_in_transit=prev_transit,
         new_in_transit=variant.in_transit_quantity,
-        message=f"Added {payload.quantity} units to Addis->Gondar freight transit.{memo}"
+        message=f"Added {payload.quantity} units to freight transit.{memo}"
     )
 
 

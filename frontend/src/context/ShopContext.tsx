@@ -9,8 +9,8 @@ export interface ShopProfile {
 }
 
 export const defaultShopProfile: ShopProfile = {
-  name: "Estif Electronics",
-  location: "Gondar, Piassa",
+  name: "Waga Stock",
+  location: "",
 };
 
 interface ShopContextType {

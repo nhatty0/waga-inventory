@@ -7,7 +7,6 @@ import { Product, ProductVariant } from "@/lib/api";
 import BarcodeScannerModal from "./BarcodeScannerModal";
 import {
   CategoryKey,
-  CATEGORY_BRANDS,
   CATEGORY_SPEC_PLACEHOLDERS,
 } from "./AddProductModal";
 
@@ -30,6 +29,7 @@ interface EditProductModalProps {
     }
   ) => Promise<void> | void;
   isSaving?: boolean;
+  suggestedBrands?: string[];
 }
 
 export default function EditProductModal({
@@ -39,6 +39,7 @@ export default function EditProductModal({
   onClose,
   onSave,
   isSaving = false,
+  suggestedBrands = [],
 }: EditProductModalProps) {
   const { t } = useLanguage();
 
@@ -84,7 +85,7 @@ export default function EditProductModal({
   else if (rawCat.includes("accessor") || rawCat.includes("decoder") || rawCat.includes("mount"))
     categoryKey = "Accessories";
 
-  const currentBrandChips = CATEGORY_BRANDS[categoryKey] || CATEGORY_BRANDS["Other"];
+  const currentBrandChips = suggestedBrands.slice(0, 3);
   const currentSpecPlaceholder =
     CATEGORY_SPEC_PLACEHOLDERS[categoryKey] || "ዝርዝር መግለጫ / Model & Specs";
 
@@ -170,38 +171,42 @@ export default function EditProductModal({
                 <label className="text-xs font-bold text-slate-300">
                   {t.editModal.brandLabel}
                 </label>
-                <span className="text-[10px] text-slate-400 flex items-center gap-0.5 font-medium">
-                  <Sparkles className="w-2.5 h-2.5 text-amber-400" />
-                  <span>ምርጫዎች (Brands)</span>
-                </span>
+                {currentBrandChips.length > 0 && (
+                  <span className="text-[10px] text-slate-400 flex items-center gap-0.5 font-medium">
+                    <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                    <span>የተለመዱ ብራንዶች ({currentBrandChips.length})</span>
+                  </span>
+                )}
               </div>
 
-              {/* Dynamic Category Brand Chips */}
-              <div className="flex gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin scrollbar-thumb-slate-700 mb-1.5 select-none">
-                {currentBrandChips.map((b) => {
-                  const isSelected = brand.toLowerCase() === b.toLowerCase();
-                  return (
-                    <button
-                      key={b}
-                      type="button"
-                      onClick={() => setBrand(b)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap border transition-all active:scale-95 ${
-                        isSelected
-                          ? "bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-950/40"
-                          : "bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-white"
-                      }`}
-                    >
-                      {b}
-                    </button>
-                  );
-                })}
-              </div>
+              {/* Dynamic Database Brand Chips */}
+              {currentBrandChips.length > 0 && (
+                <div className="flex gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin scrollbar-thumb-slate-700 mb-1.5 select-none">
+                  {currentBrandChips.map((b) => {
+                    const isSelected = brand.toLowerCase() === b.toLowerCase();
+                    return (
+                      <button
+                        key={b}
+                        type="button"
+                        onClick={() => setBrand(b)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap border transition-all active:scale-95 ${
+                          isSelected
+                            ? "bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-950/40"
+                            : "bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-white"
+                        }`}
+                      >
+                        {b}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
               <input
                 type="text"
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
-                placeholder="Brand name (e.g. Hitachi, Samsung, Sollatek)"
+                placeholder={t.addModal.brandPlaceholder}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-semibold"
                 required
               />

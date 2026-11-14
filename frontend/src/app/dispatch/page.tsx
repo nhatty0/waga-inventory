@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import TopHeader from "@/components/TopHeader";
 import { useLanguage } from "@/context/LanguageContext";
+import { useShop } from "@/context/ShopContext";
 import { isAuthenticated } from "@/lib/auth";
 import {
   Client,
@@ -61,6 +62,7 @@ type RetailPaymentMethod = "Telebirr" | "Cash" | "CBE" | "Other";
 export default function DispatchPage() {
   const router = useRouter();
   const { t } = useLanguage();
+  const { session } = useShop();
 
   // Mode Selection: "NEIGHBOR_LEND" (የጎረቤት ውሰት) vs "RURAL_BULK" (የክፍለ-ሀገር ጅምላ)
   const [activeMode, setActiveMode] = useState<OrderType>("NEIGHBOR_LEND");
@@ -625,7 +627,7 @@ export default function DispatchPage() {
       await dispatchOrder({
         client_id: existingClient?.id,
         client_name: existingClient ? undefined : cleanShop,
-        client_location: "Gondar Piassa",
+        client_location: undefined,
         order_type: "NEIGHBOR_LEND",
         items: [
           {
@@ -815,20 +817,40 @@ export default function DispatchPage() {
         );
       });
 
+      const shopName = session?.shop_name || "ዋጋ ስቶክ";
+      const shopLoc = session?.location?.trim();
+      const hasCustomLocation =
+        shopLoc &&
+        !shopLoc.toLowerCase().includes("gondar") &&
+        !shopLoc.toLowerCase().includes("piassa") &&
+        !shopLoc.includes("ጎንደር") &&
+        !shopLoc.includes("ፒያሳ");
+      const shopFooter = hasCustomLocation ? `📍 ${shopName} - ${shopLoc}` : `📍 ${shopName}`;
+
       linesText.push("━━━━━━━━━━━━━━━━━━━━");
       linesText.push(`ጠቅላላ የተከፈለ፦ ${summarySlipOrder.total_amount.toLocaleString()} ብር`);
       linesText.push("━━━━━━━━━━━━━━━━━━━━");
-      linesText.push("📍 እስቲፍ ኤሌክትሮኒክስ - ጎንደር ፒያሳ");
+      linesText.push(shopFooter);
 
       return linesText.join("\n");
     }
 
+    const shopName = session?.shop_name || "ዋጋ ስቶክ";
+    const shopLoc = session?.location?.trim();
+    const hasCustomLocation =
+      shopLoc &&
+      !shopLoc.toLowerCase().includes("gondar") &&
+      !shopLoc.toLowerCase().includes("piassa") &&
+      !shopLoc.includes("ጎንደር") &&
+      !shopLoc.includes("ፒያሳ");
+    const shopFooter = hasCustomLocation ? `📍 ${shopName} - ${shopLoc}` : `📍 ${shopName}`;
+
     const linesText = [
-      "📦 ዋጋ ኢንቬንቶሪ - የጅምላ ሽያጭ ደረሰኝ",
+      "📦 ዋጋ ስቶክ - የጅምላ ሽያጭ ደረሰኝ",
       "━━━━━━━━━━━━━━━━━━━━",
       `ትዕዛዝ ቁጥር፦ #${summarySlipOrder.id}`,
       `ደንበኛ፦ ${wholesaleClientName || summarySlipOrder.client?.name || "ጅምላ ደንበኛ"}`,
-      `መዳረሻ፦ ${wholesaleDestination || summarySlipOrder.client?.location || "ጎንደር"}`,
+      `መዳረሻ፦ ${wholesaleDestination || summarySlipOrder.client?.location || "-"}`,
     ];
 
     if (driverName || vehiclePlate || summarySlipOrder.driver_name) {
@@ -861,10 +883,10 @@ export default function DispatchPage() {
     linesText.push(`አሁን የተከፈለ፦ ${summarySlipOrder.amount_paid.toLocaleString()} ብር`);
     linesText.push(`ቀሪ ዕዳ፦ ${summarySlipOrder.balance_due.toLocaleString()} ብር`);
     linesText.push("━━━━━━━━━━━━━━━━━━━━");
-    linesText.push("📍 እስቲፍ ኤሌክትሮኒክስ - ጎንደር ፒያሳ");
+    linesText.push(shopFooter);
 
     return linesText.join("\n");
-  }, [summarySlipOrder, wholesaleClientName, wholesaleDestination, driverName, driverPhone, vehiclePlate]);
+  }, [summarySlipOrder, wholesaleClientName, wholesaleDestination, driverName, driverPhone, vehiclePlate, session]);
 
   // Copy to clipboard handler
   const handleCopySlip = async () => {

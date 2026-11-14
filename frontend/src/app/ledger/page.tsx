@@ -96,15 +96,20 @@ function generateWholesaleVoucherSlip(
   shopName?: string,
   shopLocation?: string
 ): string {
-  const storeName = shopName || "እስቲፍ ኤሌክትሮኒክስ";
-  const storeLocation = shopLocation || "ጎንደር ፒያሳ";
+  const storeName = shopName || "ዋጋ ስቶክ";
+  const hasCustomLoc =
+    shopLocation &&
+    !shopLocation.toLowerCase().includes("gondar") &&
+    !shopLocation.toLowerCase().includes("piassa") &&
+    !shopLocation.includes("ጎንደር") &&
+    !shopLocation.includes("ፒያሳ");
 
   const lines = [
     `📦 ${storeName} - የጅምላ ሂሳብ ደረሰኝ`,
     "━━━━━━━━━━━━━━━━━━━━",
     `ትዕዛዝ ቁጥር፦ #${order.id}`,
     `ደንበኛ፦ ${order.client?.name || "ጅምላ ደንበኛ"}`,
-    `መዳረሻ፦ ${order.client?.location || "ጎንደር"}`,
+    `መዳረሻ፦ ${order.client?.location || "-"}`,
   ];
 
   if (order.client?.phone) {
@@ -130,7 +135,7 @@ function generateWholesaleVoucherSlip(
   lines.push(`የተከፈለ፦ ${order.amount_paid.toLocaleString()} ብር`);
   lines.push(`ቀሪ ዕዳ፦ ${order.balance_due.toLocaleString()} ብር`);
   lines.push("━━━━━━━━━━━━━━━━━━━━");
-  lines.push(`📍 ${storeName} - ${storeLocation}`);
+  lines.push(hasCustomLoc ? `📍 ${storeName} - ${shopLocation}` : `📍 ${storeName}`);
 
   return lines.join("\n");
 }
@@ -736,10 +741,16 @@ export default function LedgerPage() {
                       </h3>
 
                       <div className="flex items-center gap-3 text-[11px] text-slate-400">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3 text-blue-400" />
-                          <span>{order.client?.location || "ጎንደር"}</span>
-                        </span>
+                        {order.client?.location &&
+                          !order.client.location.toLowerCase().includes("gondar") &&
+                          !order.client.location.toLowerCase().includes("piassa") &&
+                          !order.client.location.includes("ጎንደር") &&
+                          !order.client.location.includes("ፒያሳ") && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3 text-blue-400" />
+                              <span>{order.client.location}</span>
+                            </span>
+                          )}
                         {order.client?.phone && (
                           <a
                             href={`tel:${order.client.phone}`}

@@ -6,6 +6,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useShop, ShopProfile } from "@/context/ShopContext";
 import { logout } from "@/lib/auth";
 import { getMe } from "@/lib/api";
+import WagaLogo from "@/components/WagaLogo";
 
 interface TopHeaderProps {
   title?: string;
@@ -42,20 +43,30 @@ export default function TopHeader({
     }
   }, [session, setSession]);
 
-  const telegramBotUsername = session?.telegram_bot_username || "WagaInventoryBot";
+  const telegramBotUsername = session?.telegram_bot_username || "WagaStockBot";
   const telegramBotUrl = session?.shop_id
     ? `https://t.me/${telegramBotUsername}?start=shop_${session.shop_id}`
     : `https://t.me/${telegramBotUsername}`;
+
+  const isCustomLocation = Boolean(
+    currentLocation &&
+    currentLocation.trim() !== "" &&
+    currentLocation.toLowerCase() !== "gondar" &&
+    !currentLocation.toLowerCase().includes("gondar") &&
+    !currentLocation.toLowerCase().includes("piassa") &&
+    !currentLocation.includes("ጎንደር") &&
+    !currentLocation.includes("ፒያሳ")
+  );
 
   return (
     <header className="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-4 py-2.5">
       <div className="max-w-md mx-auto space-y-1.5">
         {/* Main Header Row */}
         <div className="flex items-center justify-between gap-2">
-          {/* Title and Pulse Indicator */}
+          {/* Title and Logo */}
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shadow-sm shadow-blue-500/50 shrink-0" />
+              <WagaLogo size="xs" />
               <h1 className="text-base sm:text-lg font-black tracking-tight text-white flex items-center truncate">
                 <span>{displayTitle}</span>
               </h1>
@@ -68,10 +79,12 @@ export default function TopHeader({
               ) : (
                 <>
                   <span className="font-bold text-slate-200 truncate">{currentShopName}</span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-medium text-blue-400 bg-blue-950/60 px-1.5 py-0.5 rounded-md border border-blue-800/50 shrink-0">
-                    <MapPin className="w-2.5 h-2.5 text-blue-400 shrink-0" />
-                    <span>{currentLocation}</span>
-                  </span>
+                  {isCustomLocation && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded-md border border-emerald-800/50 shrink-0">
+                      <MapPin className="w-2.5 h-2.5 text-emerald-400 shrink-0" />
+                      <span>{currentLocation}</span>
+                    </span>
+                  )}
                 </>
               )}
             </div>

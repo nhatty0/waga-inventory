@@ -139,7 +139,7 @@ def dispatch_order(
                 name=clean_name,
                 phone=dispatch_in.client_phone,
                 type=default_type,
-                location=dispatch_in.client_location or "Gondar"
+                location=dispatch_in.client_location or ""
             )
             session.add(client)
             session.commit()

@@ -71,7 +71,7 @@ def get_current_shop(
 # --- Schemas ---
 class ShopRegisterRequest(BaseModel):
     shop_name: str = Field(min_length=2)
-    location: str = Field(default="Gondar")
+    location: str = Field(default="")
     owner_phone: str = Field(min_length=9)
     pin: str = Field(pattern=r"^\d{4}$", description="4-digit numeric PIN")
 
@@ -115,7 +115,7 @@ def register_shop(payload: ShopRegisterRequest, session: Session = Depends(get_s
 
     shop = Shop(
         name=payload.shop_name.strip(),
-        location=payload.location.strip() or "Gondar",
+        location=payload.location.strip(),
         owner_phone=phone,
         pin_hash=_hash_pin(payload.pin),
     )
